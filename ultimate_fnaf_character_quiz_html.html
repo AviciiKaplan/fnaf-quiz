@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Which FNAF Character Are You? — Ultimate Quiz</title>
+  <style>
+    :root{
+      --bg:#0b0d12; --card:#121623; --ink:#e7ecff; --muted:#9aa4c7; --acc:#6aa7ff; --acc2:#ff6ad5;
+      --ok:#6ef1b2; --warn:#ffd36a; --bad:#ff6a6a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif; background:radial-gradient(1200px 800px at 100% 0%, #121826, transparent 60%), linear-gradient(180deg,#0b0d12 0%, #0b0d12 100%); color:var(--ink)}
+    .wrap{max-width:980px; margin:32px auto; padding:0 16px}
+    .card{background:linear-gradient(180deg,#161b2a 0%, #101421 100%); border:1px solid rgba(255,255,255,.07); box-shadow:0 10px 30px rgba(0,0,0,.35); border-radius:18px}
+    header.hero{padding:26px 22px 18px; display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    h1{margin:0; font-size:clamp(22px,3vw,32px); letter-spacing:.3px}
+    p.sub{margin:.25rem 0 0; color:var(--muted)}
+    .btn{appearance:none; border:1px solid rgba(255,255,255,.1); background:linear-gradient(180deg, #1c2336, #161b2a); color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; transition:.2s transform,.2s box-shadow,.2s background}
+    .btn:hover{transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.35)}
+    .btn.acc{background:linear-gradient(180deg, #2a6bff, #1e50c7); border-color:#2a6bff}
+    .btn.ghost{background:transparent}
+    .grid{display:grid; gap:16px}
+    .q{padding:18px; border-top:1px solid rgba(255,255,255,.06)}
+    .q h3{margin:0 0 10px; font-size:18px}
+    .opts{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+    label.opt{display:flex; gap:10px; align-items:flex-start; background:#0f1422; border:1px solid rgba(255,255,255,.07); padding:12px 12px; border-radius:12px; cursor:pointer; transition:.18s border-color, .18s background}
+    label.opt:hover{border-color:var(--acc)}
+    .opt input{margin-top:2px}
+    .footer{display:flex; gap:10px; padding:16px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    .result{padding:18px}
+    .pill{display:inline-flex; align-items:center; gap:6px; background:#0c1220; border:1px solid rgba(255,255,255,.08); padding:6px 10px; border-radius:999px; font-size:12px; color:var(--muted)}
+    .pill b{color:var(--ink)}
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .res-card{background:linear-gradient(180deg,#141a2a,#0f1320); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px; flex:1 1 260px}
+    .res-card h4{margin:0 0 6px}
+    .res-card p{margin:0; color:var(--muted)}
+    details.share{border-top:1px dashed rgba(255,255,255,.1); padding:12px 18px}
+    code.inline{background:#0f1422; border:1px solid rgba(255,255,255,.08); padding:2px 6px; border-radius:6px}
+    .tiny{font-size:12px}
+    .credits{padding:12px 18px; color:var(--muted); font-size:12px}
+    @media (max-width:640px){
+      header.hero{padding:18px 14px}
+      .q{padding:14px}
+      .footer{padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="app">
+      <header class="hero">
+        <div>
+          <h1>Which FNAF Character Are You?</h1>
+          <p class="sub">Ultimate shareable quiz • includes main, toy, withered, nightmare, sister location, rockstar, phantom, glamrock, Afton, puppet, shadow, & more.</p>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="btnExport">Download .HTML</button>
+          <button class="btn acc" id="btnStart">Start / Reset</button>
+        </div>
+      </header>
+
+      <form id="quiz"></form>
+
+      <div class="footer">
+        <div class="row">
+          <span class="pill"><b>Questions:</b> <span id="countQ">–</span></span>
+          <span class="pill"><b>Answered:</b> <span id="countA">0</span></span>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnSubmit" type="button" disabled>Get Result</button>
+        </div>
+      </div>
+
+      <section id="results" hidden>
+        <div class="result">
+          <h2 style="margin:0 0 8px">Your Match</h2>
+          <p class="muted" id="summary">Answer the quiz to see your character!</p>
+          <div class="row" id="topMatches"></div>
+        </div>
+        <details class="share">
+          <summary><strong>How to share this quiz</strong></summary>
+          <ol class="tiny">
+            <li>Click <em>Download .HTML</em> above to save this exact page.</li>
+            <li>Send the file to friends, or host it (free) on GitHub Pages, Netlify, or any static host.</li>
+            <li>No servers or sign-ins needed. Everything runs locally in the browser.</li>
+          </ol>
+          <p class="tiny">Tip: rename the file to <code class="inline">fnaf-which-character.html</code> before sharing.</p>
+        </details>
+        <div class="credits">Unofficial fan-made personality quiz. Characters belong to the Five Nights at Freddy’s franchise. This quiz matches vibes using tags; results are for fun.</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // --- Utility helpers ---
+    const $ = s=>document.querySelector(s);
+    const h = (tag, attrs={}, ...kids)=>{
+      const el = document.createElement(tag);
+      for(const [k,v] of Object.entries(attrs)){
+        if(k==='class') el.className=v; else if(k==='html') el.innerHTML=v; else el.setAttribute(k,v);
+      }
+      for(const kid of kids){ if(typeof kid==='string') el.appendChild(document.createTextNode(kid)); else if(kid) el.appendChild(kid); }
+      return el;
+    };
+
+    // --- Tag schema ---
+    // Questions map answers -> trait tags
+    const QUESTIONS = [
+      {q:'How do you make an entrance?', opts:[
+        {t:'leader,protector,showman'}, // A
+        {t:'stealth,observer,stalker'}, // B
+        {t:'chaos,trickster,unhinged'}, // C
+        {t:'mystery,intellect,manipulator'} // D
+      ]},
+      {q:'What drives you most?', opts:[
+        {t:'purpose,loyalty'},
+        {t:'revenge,vengeful'},
+        {t:'freedom,rebellion'},
+        {t:'control,dominance'}
+      ]},
+      {q:'Pick a battlefield.', opts:[
+        {t:'stage,showman'},
+        {t:'vents,stalker'},
+        {t:'arcade,flashy'},
+        {t:'backrooms,planner'}
+      ]},
+      {q:'Your humor is…', opts:[
+        {t:'dry,subtle'},
+        {t:'playful,teasing'},
+        {t:'dark,sinister'},
+        {t:'unsettling,deadpan'}
+      ]},
+      {q:'In a team, you are…', opts:[
+        {t:'leader,protector'},
+        {t:'strategist,intellect'},
+        {t:'loosecannon,chaos'},
+        {t:'wildcard,mystery'}
+      ]},
+      {q:'Choose a lair.', opts:[
+        {t:'mall,flashy,glam'},
+        {t:'maintenance,backrooms'},
+        {t:'circus,showman'},
+        {t:'forest,primal'}
+      ]},
+      {q:'When threatened, you…', opts:[
+        {t:'fight,protector'},
+        {t:'outsmart,intellect'},
+        {t:'hide,observer'},
+        {t:'taunt,trickster'}
+      ]},
+      {q:'Pick a colorway.', opts:[
+        {t:'brown,gold'},
+        {t:'red,black'},
+        {t:'purple,blue'},
+        {t:'white,pink'}
+      ]},
+      {q:'Your weakness?', opts:[
+        {t:'curiosity'},
+        {t:'temper'},
+        {t:'lonely,broken'},
+        {t:'obsession,control'}
+      ]},
+      {q:'What is fear to you?', opts:[
+        {t:'fuel,trickster'},
+        {t:'tool,manipulator'},
+        {t:'warning,observer'},
+        {t:'noise,unbothered'}
+      ]},
+      {q:'Choose a sound.', opts:[
+        {t:'musicbox,grace'},
+        {t:'whirring,mechanical'},
+        {t:'footsteps,stalker'},
+        {t:'laughter,chaos'}
+      ]},
+      {q:'Endgame philosophy?', opts:[
+        {t:'redemption'},
+        {t:'revenge,vengeful'},
+        {t:'freedom'},
+        {t:'inevitable,corruption'}
+      ]}
+    ];
+
+    // Character catalog. Each character carries tags; scoring is cosine-like over tag counts.
+    const CHARS = [
+      // FNAF 1
+      C('Freddy Fazbear','FNAF 1','leader,showman,protector,brown,gold,stage,whirring'),
+      C('Bonnie','FNAF 1','blue,purple,stalker,stage,curiosity,footsteps'),
+      C('Chica','FNAF 1','protector,stage,temper,white,pink'),
+      C('Foxy','FNAF 1','red,black,trickster,stalker,vents,chaos,footsteps'),
+      C('Golden Freddy','FNAF 1','mystery,shadow,unsettling,purple,blue,backrooms'),
+
+      // FNAF 2 (Toy / Withered / Puppet / Mangle)
+      C('Toy Freddy','FNAF 2','showman,flashy,brown,gold,stage'),
+      C('Toy Bonnie','FNAF 2','blue,flashy,teasing,arcade'),
+      C('Toy Chica','FNAF 2','white,pink,flashy,teasing'),
+      C('Mangle','FNAF 2','chaos,unhinged,vents,white,pink,laughter'),
+      C('Balloon Boy (BB)','FNAF 2','trickster,teasing,arcade,laughter'),
+      C('JJ','FNAF 2','trickster,stealth,unsettling'),
+      C('Withered Freddy','FNAF 2','leader,broken,footsteps'),
+      C('Withered Bonnie','FNAF 2','broken,stalker,blue,purple,backrooms'),
+      C('Withered Chica','FNAF 2','temper,broken,white,pink'),
+      C('Withered Foxy','FNAF 2','red,black,stalker,footsteps,chaos'),
+      C('Withered Golden Freddy','FNAF 2','shadow,mystery,backrooms'),
+      C('The Puppet (Marionette)','FNAF 2','protector,grace,musicbox,vengeful,shadow'),
+
+      // Shadows
+      C('Shadow Bonnie (RWQFSFASXC)','FNAF 2','shadow,stealth,observer,purple,blue,backrooms'),
+      C('Shadow Freddy','FNAF 2','shadow,unsettling,dominance,mystery'),
+
+      // FNAF 3 (Springtrap + Phantoms)
+      C('Springtrap (William Afton)','FNAF 3','vengeful,dominance,corruption,green,backrooms,footsteps'),
+      C('Phantom Freddy','FNAF 3','phantom,shadow,brown,gold,unsettling'),
+      C('Phantom Chica','FNAF 3','phantom,unsettling,white,pink'),
+      C('Phantom Foxy','FNAF 3','phantom,stalker,red,black'),
+      C('Phantom BB','FNAF 3','phantom,trickster,teasing'),
+      C('Phantom Mangle','FNAF 3','phantom,chaos,laughter'),
+      C('Phantom Puppet','FNAF 3','phantom,protector,shadow'),
+
+      // FNAF 4 (Nightmares)
+      C('Nightmare Freddy','FNAF 4','nightmare,dominance,unsettling,stalker'),
+      C('Nightmare Bonnie','FNAF 4','nightmare,stalker,blue,purple'),
+      C('Nightmare Chica','FNAF 4','nightmare,temper,white,pink'),
+      C('Nightmare Foxy','FNAF 4','nightmare,red,black,chaos,stalker'),
+      C('Nightmare Fredbear','FNAF 4','nightmare,leader,dominance,gold'),
+      C('Nightmare','FNAF 4','nightmare,shadow,inevitable'),
+      C('Plushtrap','FNAF 4','trickster,small,teasing,vents'),
+      C('Jack-O-Bonnie','FNAF 4','nightmare,orange,vengeful'),
+      C('Jack-O-Chica','FNAF 4','nightmare,orange,temper'),
+      C('Nightmare Balloon Boy','FNAF 4','nightmare,trickster,laughter'),
+
+      // Sister Location
+      C('Circus Baby','Sister Location','showman,strategist,intellect,manipulator,white,pink,circus'),
+      C('Ballora','Sister Location','grace,musicbox,blue,purple,stage'),
+      C('Funtime Freddy','Sister Location','showman,loud,chaos,bon-bon,laughter'),
+      C('Funtime Foxy','Sister Location','showman,flashy,teasing,white,pink'),
+      C('Ennard','Sister Location','mystery,intellect,broken,backrooms,vents'),
+      C('Bidybab','Sister Location','teasing,small,vents'),
+      C('Minireena','Sister Location','grace,small,teasing'),
+      C('Bon-Bon','Sister Location','sidekick,teasing,blue'),
+      C('Bonnet','Sister Location','sidekick,flashy,pink'),
+      C('Yenndo','Sister Location','endoskeleton,observer,backrooms'),
+
+      // Pizzeria Simulator (FNAF 6)
+      C('Molten Freddy','FNAF 6','broken,chaos,unhinged,backrooms'),
+      C('Scrap Baby','FNAF 6','vengeful,manipulator,showman,white,pink'),
+      C('Scraptrap','FNAF 6','vengeful,dominance,green,corruption'),
+      C('Lefty','FNAF 6','shadow,protector,observer,black'),
+      C('Rockstar Freddy','FNAF 6','showman,flashy,gold,brown'),
+      C('Rockstar Bonnie','FNAF 6','showman,blue,purple'),
+      C('Rockstar Chica','FNAF 6','showman,white,pink'),
+      C('Rockstar Foxy','FNAF 6','trickster,red,black,showman'),
+      C('Music Man','FNAF 6','musicbox,showman,creepy'),
+      C('El Chip','FNAF 6','showman,arcade,flashy'),
+      C('Funtime Chica','FNAF 6','flashy,white,pink,showman'),
+      C('Helpy','FNAF 6','helper,small,purple,blue'),
+      C('Happy Frog','FNAF 6','cheery,green,stage'),
+      C('Mr. Hippo','FNAF 6','storyteller,deadpan,purple'),
+      C('Pigpatch','FNAF 6','banjo,playful,pink'),
+      C('Nedd Bear','FNAF 6','laidback,brown'),
+      C('Orville Elephant','FNAF 6','magician,orange,showman'),
+      C('Security Puppet','FNAF 6','protector,vengeful,shadow'),
+
+      // UCN specials / Dreadbear
+      C('Dee Dee (DD)','UCN','trickster,chaos,teasing'),
+      C('Dreadbear','HW: Dreadbear','nightmare,dominance,green'),
+
+      // Help Wanted / Glitch
+      C('Glitchtrap','Help Wanted','manipulator,dominance,corruption,purple,blue'),
+
+      // Security Breach & Ruin
+      C('Glamrock Freddy','Security Breach','protector,showman,flashy,brown,gold,mall'),
+      C('Glamrock Chica','Security Breach','flashy,white,pink,arcade'),
+      C('Montgomery Gator','Security Breach','temper,flashy,green,arcade'),
+      C('Roxanne Wolf','Security Breach','confidence,lonely,flashy,grey'),
+      C('Sun (Daycare Attendant)','Security Breach','showman,cheery,protector'),
+      C('Moon (Daycare Attendant)','Security Breach','stalker,unsettling,shadow'),
+      C('Vanny','Security Breach','manipulator,stalker,white,pink'),
+      C('Burntrap','Security Breach','corruption,vengeful,dominance,green'),
+    ];
+
+    function C(name, series, tags){
+      const tagset = toSet(tags);
+      return {id: slug(name), name, series, tags: tagset, blurb: makeBlurb(name, series, tagset)};
+    }
+    function toSet(s){ return new Set(s.split(/\s*,\s*/g).filter(Boolean)); }
+    function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+
+    function makeBlurb(name, series, tags){
+      const bits = [];
+      if(tags.has('showman')) bits.push('performer');
+      if(tags.has('protector')) bits.push('protector');
+      if(tags.has('trickster')) bits.push('prankster');
+      if(tags.has('stalker')) bits.push('stalker');
+      if(tags.has('manipulator')) bits.push('manipulator');
+      if(tags.has('vengeful')) bits.push('vengeful');
+      if(tags.has('flashy')) bits.push('flashy');
+      if(tags.has('shadow')) bits.push('shadowy');
+      if(tags.has('broken')) bits.push('broken');
+      if(tags.has('chaos')) bits.push('chaotic');
+      if(tags.has('intellect')) bits.push('calculating');
+      const trait = bits.slice(0,3).join(', ') || 'enigmatic';
+      return `${name} • ${series} • ${trait}`;
+    }
+
+    // Render quiz
+    function render(){
+      const form = $('#quiz');
+      form.innerHTML = '';
+      form.appendChild(h('div',{class:'q'}, h('p',{class:'muted tiny'},'Answer all questions, then click “Get Result”.')));
+      QUESTIONS.forEach((Q,i)=>{
+        const qi = i+1;
+        const q = h('div',{class:'q'});
+        q.appendChild(h('h3',{}, `Q${qi}. ${Q.q}`));
+        const opts = h('div',{class:'opts'});
+        Q.opts.forEach((opt,j)=>{
+          const id=`q${qi}_${j}`;
+          const labelText = ['A','B','C','D'][j];
+          const lb = h('label',{class:'opt', for:id});
+          const input = h('input',{type:'radio', name:`q${qi}`, id, value:j});
+          input.addEventListener('change', syncCounts);
+          lb.appendChild(input);
+          lb.appendChild(h('div',{}, `${labelText}. ${pretty(opt.t)}`));
+          opts.appendChild(lb);
+        });
+        q.appendChild(opts);
+        form.appendChild(q);
+      });
+      syncCounts();
+    }
+
+    function pretty(tags){
+      // turn first tag into human-friendly hint for the option label without spoilers
+      const key = tags.split(',')[0];
+      const map = {leader:'Lead the room', stealth:'Slip in quietly', chaos:'Cause chaos', mystery:'Be mysterious',
+        purpose:'Find purpose', revenge:'Seek revenge', freedom:'Crave freedom', control:'Seize control',
+        stage:'Command the stage', vents:'Crawl the vents', arcade:'Neon arcade', backrooms:'Backrooms',
+        dry:'Dry jokes', playful:'Playful', dark:'Dark humor', unsettling:'Unsettling',
+        strategist:'Strategist', loosecannon:'Loose cannon', wildcard:'Wildcard',
+        mall:'Neon mall', maintenance:'Maintenance hall', circus:'Circus ring', forest:'Dark forest',
+        fight:'Fight', outsmart:'Outsmart', hide:'Hide', taunt:'Taunt',
+        brown:'Brown & gold', red:'Red & black', purple:'Purple & blue', white:'White & pink',
+        curiosity:'Curiosity', temper:'Temper', lonely:'Loneliness', obsession:'Obsession',
+        fuel:'Fear is fuel', tool:'Fear is a tool', warning:'Fear warns', noise:'Ignore fear',
+        musicbox:'Music box', whirring:'Mechanical whirr', footsteps:'Heavy footsteps', laughter:'Distorted laughter',
+        redemption:'Redemption', vengeful:'Revenge', freedom:'Freedom', inevitable:'Nothing ever ends'
+      };
+      return map[key] || key;
+    }
+
+    function syncCounts(){
+      const total = QUESTIONS.length;
+      const answered = [...document.querySelectorAll('input[type=radio]:checked')].length;
+      $('#countQ').textContent = total;
+      $('#countA').textContent = answered;
+      $('#btnSubmit').disabled = answered !== total;
+    }
+
+    function score(){
+      // Accumulate tag weights from answers
+      const tagScores = new Map();
+      function add(tag,w=1){ tagScores.set(tag,(tagScores.get(tag)||0)+w); }
+      QUESTIONS.forEach((Q,i)=>{
+        const sel = document.querySelector(`input[name=q${i+1}]:checked`);
+        if(!sel) return;
+        const tags = Q.opts[+sel.value].t.split(',');
+        for(const t of tags) add(t,1);
+      });
+      // Character score = overlap count (weighted Jaccard-ish)
+      const results = CHARS.map(c=>{
+        let s=0;
+        for(const t of c.tags){ s += (tagScores.get(t)||0); }
+        // slight boost if color/style alignment found
+        const boostTags=['brown','gold','blue','purple','white','pink','red','black','green','mall','stage','vents','arcade','backrooms'];
+        let boost=0; for(const t of boostTags) if(c.tags.has(t)) boost += (tagScores.get(t)||0)*0.15;
+        return {c, score:s+boost};
+      }).sort((a,b)=>b.score-a.score);
+      return results;
+    }
+
+    function showResults(){
+      const results = score();
+      const [top, second, third] = results;
+      const container = $('#topMatches');
+      container.innerHTML = '';
+      for(const r of [top, second, third]){
+        if(!r) continue;
+        container.appendChild(
+          h('div',{class:'res-card'},
+            h('h4',{}, `${r.c.name}`),
+            h('p',{class:'tiny muted'}, `${r.c.series}`),
+            h('p',{}, r.c.blurb)
+          )
+        );
+      }
+      const sum = $('#summary');
+      sum.textContent = `Top match: ${top.c.name} — close contenders: ${second?.c.name || '—'}, ${third?.c.name || '—'}`;
+      $('#results').hidden = false;
+      window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+    }
+
+    // Export current page as a downloadable HTML file (self-contained)
+    function downloadSelf(){
+      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'fnaf-which-character.html';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    }
+
+    // Wire up
+    $('#btnStart').addEventListener('click', ()=>{ render(); $('#results').hidden = true; });
+    $('#btnSubmit').addEventListener('click', showResults);
+    $('#btnExport').addEventListener('click', downloadSelf);
+
+    // initial
+    render();
+  </script>
+</body>
+</html>
